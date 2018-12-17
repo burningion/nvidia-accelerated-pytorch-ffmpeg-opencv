@@ -2,7 +2,7 @@
 
 This is a work in progress Docker image for a talk demonstrating processing videos with GPUs.
 
-It starts with the [NVIDIA Pytorch](https://ngc.nvidia.com/catalog/containers/nvidia%2Fpytorch) container, and then builds ffmpeg and OpenCV 4.0. 
+It starts with the [NVIDIA Pytorch](https://ngc.nvidia.com/catalog/containers/nvidia%2Fpytorch) container, and then builds ffmpeg and OpenCV 4.0 from source with hardware acceleration. 
 
 Running it via `nvidia-docker` gives us hardware access to the GPU, and lets us keep our host operating system clean / independent. 
 
