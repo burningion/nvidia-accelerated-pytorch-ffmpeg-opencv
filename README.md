@@ -16,5 +16,5 @@ Besides that, this takes a __while__ to build. So uh, grab a cup of coffee or tw
 
 ```bash
 $ docker build -t ffmpegpytorch .
-$ docker run -it ffmpegpytorch /bin/bash
+$ nvidia-docker run -it ffmpegpytorch /bin/bash
 ```

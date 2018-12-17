@@ -18,3 +18,5 @@ RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 RUN cd nv-codec-headers && make && make install
 RUN git clone https://git.ffmpeg.org/ffmpeg.git
 RUN cd ffmpeg && ./configure --pkg-config-flags="--static" --enable-cuda --enable-cuvid --enable-libnpp  --enable-gpl --enable-libass --enable-nvenc --enable-nonfree --extra-cflags="-I/usr/local/cuda/include/" --extra-ldflags=-L/usr/local/cuda/lib64/ && make -j4 && make install
+RUN cd /workspace/opencv/build/modules/python3 && make && make install
+RUN ln -s /usr/local/python/python-3.6/cv2.cpython-36m-x86_64-linux-gnu.so /opt/conda/lib/python3.6/site-packages/cv2.so
