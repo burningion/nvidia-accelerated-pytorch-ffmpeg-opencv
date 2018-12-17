@@ -1,4 +1,4 @@
-# Pytorch NVIDIA Docker Container with Hardware Accelerated ffmpeg / OpenCV 4
+# Pytorch NVIDIA Docker Container with ffmpeg / OpenCV 4
 
 This is a work in progress Docker image for a talk demonstrating processing videos with GPUs.
 
