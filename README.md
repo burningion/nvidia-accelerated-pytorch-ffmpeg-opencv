@@ -1,4 +1,4 @@
-# Pytorch NVIDIA Docker Container with ffmpeg / OpenCV 4
+# Pytorch NVIDIA Docker Container with Hardware Accelerated ffmpeg / OpenCV 4
 
 This is a work in progress Docker image for a talk demonstrating processing videos with GPUs.
 
@@ -17,4 +17,24 @@ Besides that, this takes a __while__ to build. So uh, grab a cup of coffee or tw
 ```bash
 $ docker build -t ffmpegpytorch .
 $ nvidia-docker run -it ffmpegpytorch /bin/bash
+```
+
+Once in the container, we can then run Python, and see our shell:
+
+```bash
+$ python3
+Python 3.6.7 |Anaconda, Inc.| (default, Oct 23 2018, 19:16:44) 
+[GCC 7.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> inputVideo = cv2.VideoCapture('video.MOV')
+>>> ok, frame = inputVideo.read()
+>>> frame.shape
+(1080, 1920, 3)
+```
+
+Remember, you can also mount directories and open up ports if you want to run Jupyter notebook, for example:
+
+```bash
+$ nvidia-docker run -p 8888:8888/tcp -it -v localdir:/workspace/localdir_in_container ffmpegpytorch /bin/bash
 ```
