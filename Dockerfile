@@ -4,7 +4,7 @@ RUN apt-get -y install autoconf automake build-essential libass-dev libtool  pkg
 RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 RUN cd nv-codec-headers && make && make install
 RUN git clone https://git.ffmpeg.org/ffmpeg.git
-RUN cd ffmpeg && ./configure --pkg-config-flags="--static" --enable-cuda --enable-cuvid --enable-libnpp  --enable-gpl --enable-pic --enable-libass --enable-nvenc --enable-nonfree --extra-cflags="-I/usr/local/cuda/include/" --extra-ldflags=-L/usr/local/cuda/lib64/ && make -j4  && make install
+RUN cd ffmpeg && LDFLAGS=-Wl,-Bsymbolic ./configure  --pkg-config-flags="--static" --enable-cuda --enable-cuvid --enable-libnpp  --enable-gpl --enable-pic --enable-libass --enable-nvenc --enable-nonfree --extra-cflags="-I/usr/local/cuda/include/" --extra-ldflags=-L/usr/local/cuda/lib64/ && make -j4  && make install
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.0.0.zip && unzip opencv.zip && mv opencv-4.0.0 opencv
 RUN wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.0.0.zip && unzip opencv_contrib.zip && mv opencv_contrib-4.0.0 opencv_contrib
 RUN cd opencv && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=RELEASE \
@@ -17,6 +17,10 @@ RUN cd opencv && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=RELEASE \
   -D PYTHON_LIBRARY=/opt/conda/lib/python3.6 \
   -D PYTHON_EXECUTABLE=/opt/conda/bin/python3 \
   -D PYTHON2_EXECUTABLE=/usr/bin/python2 \
+  -D WITH_CUDA=ON \
+  -D ENABLE_FAST_MATH=1 \
+  -D CUDA_FAST_MATH=1 \
+  -D WITH_CUBLAS=1 \
   -D WITH_FFMPEG=ON \
 	-D BUILD_EXAMPLES=ON .. && make -j4 && make install
 RUN cd /workspace/opencv/build/modules/python3 && make && make install
