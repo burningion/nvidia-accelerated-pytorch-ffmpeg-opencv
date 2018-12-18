@@ -7,6 +7,7 @@ RUN git clone https://git.ffmpeg.org/ffmpeg.git
 RUN cd ffmpeg && LDFLAGS=-Wl,-Bsymbolic ./configure  --pkg-config-flags="--static" --enable-cuda --enable-cuvid --enable-libnpp  --enable-gpl --enable-pic --enable-libass --enable-nvenc --enable-nonfree --extra-cflags="-I/usr/local/cuda/include/" --extra-ldflags=-L/usr/local/cuda/lib64/ && make -j4  && make install
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.0.0.zip && unzip opencv.zip && mv opencv-4.0.0 opencv
 RUN wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.0.0.zip && unzip opencv_contrib.zip && mv opencv_contrib-4.0.0 opencv_contrib
+RUN mv /usr/local/lib/libavcodec.a /workspace/libavcodec.a
 RUN cd opencv && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
 	-D INSTALL_PYTHON_EXAMPLES=ON \
