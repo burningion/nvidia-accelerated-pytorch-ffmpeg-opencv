@@ -41,11 +41,13 @@ def prep_image(img, inp_dim):
     img_ = torch.from_numpy(img_).float().div(255.0).unsqueeze(0)
     return img_, orig_im, dim
 
-def write(x, img):
+def write(x, img, frame_no):
     c1 = tuple(x[1:3].int())
     c2 = tuple(x[3:5].int())
     cls = int(x[-1])
     label = "{0}".format(classes[cls])
+    if label == 'clock':
+        print("Clock at frame %i" % frame_no)
     color = random.choice(colors)
     cv2.rectangle(img, c1, c2,color, 1)
     t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 1 , 1)[0]
@@ -116,7 +118,7 @@ if __name__ == '__main__':
     
     cap = cv2.VideoCapture(videofile)
     fourcc = cv2.VideoWriter_fourcc(*'X265') # invalid fourcc, but it forces GPU usage for me *shrug*
-    out = cv2.VideoWriter('/workspace/input/test.avi',fourcc, 60.0, (1920,1080))
+    out = cv2.VideoWriter('train.avi',fourcc, 30.0, (480,360))
     assert cap.isOpened(), 'Cannot capture source'
     
     frames = 0
@@ -142,7 +144,7 @@ if __name__ == '__main__':
 
             if type(output) == int:
                 frames += 1
-                print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+                #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
                 '''
                 cv2.imshow("frame", orig_im)
                 key = cv2.waitKey(1)
@@ -170,7 +172,7 @@ if __name__ == '__main__':
             classes = load_classes('data/coco.names')
             colors = pkl.load(open("pallete", "rb"))
             
-            list(map(lambda x: write(x, orig_im), output))
+            list(map(lambda x: write(x, orig_im, frames), output))
             
             
             #cv2.imshow("frame", orig_im)
@@ -179,10 +181,9 @@ if __name__ == '__main__':
             #    break
             out.write(orig_im)
             frames += 1
-            print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+            #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
 
             
         else:
             break
 out.release()
-
