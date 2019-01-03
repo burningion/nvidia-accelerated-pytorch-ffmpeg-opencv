@@ -25,7 +25,8 @@ RUN cd opencv && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D BUILD_EXAMPLES=ON .. && make -j4 && make install
 RUN cd /workspace/opencv/build/modules/python3 && make && make install
 RUN ln -s /usr/local/python/python-3.6/cv2.cpython-36m-x86_64-linux-gnu.so /opt/conda/lib/python3.6/site-packages/cv2.so
-RUN pip install pandas jupyter
+RUN pip install pandas jupyter ipywidgets
+RUN jupyter nbextension enable --py widgetsnbextension
 RUN git clone https://github.com/ayooshkathuria/pytorch-yolo-v3 && cd pytorch-yolo-v3 && wget https://pjreddie.com/media/files/yolov3.weights
 # Add Tini. Tini operates as a process subreaper for jupyter. This prevents
 # kernel crashes.
