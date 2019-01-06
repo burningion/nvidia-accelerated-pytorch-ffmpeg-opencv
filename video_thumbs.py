@@ -1,4 +1,5 @@
 from __future__ import division
+import IPython
 import time
 import torch 
 import torch.nn as nn
@@ -112,13 +113,13 @@ if __name__ == '__main__':
     if CUDA:
         model.cuda()
         print("Using cuda!")
-        
+    
     model(get_test_input(inp_dim, CUDA), CUDA)
 
     model.eval()
     
     videofile = args.video
-    
+    print(args.image)
     cap = cv2.VideoCapture(videofile)
     #fourcc = cv2.VideoWriter_fourcc(*'X265') # invalid fourcc, but it forces GPU usage for me *shrug*
     #out = cv2.VideoWriter('train.avi',fourcc, 30.0, (480,360))
@@ -149,6 +150,7 @@ if __name__ == '__main__':
 
             if type(output) == int:
                 frames += 1
+                continue
                 #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
                 '''
                 cv2.imshow("frame", orig_im)
@@ -176,19 +178,23 @@ if __name__ == '__main__':
             
             classes = load_classes('data/coco.names')
             colors = pkl.load(open("pallete", "rb"))
-            
+            #IPython.embed()
             list(map(lambda x: write(x, orig_im, frames), output))
+
+            clocky = False
+            for j in output:
+                if j[-1] == 74:
+                    clocky = True
             
-            
+            if args.image and (frames - frameDetected) > args.skip and clocky:
+                print("Writing frame %i to disk, number %i detected" % (frames, framesOut))
+                cv2.imwrite('../input/stills/%05d.png' % framesOut, orig_im)
+                frameDetected = frames
+                framesOut += 1
             #cv2.imshow("frame", orig_im)
             #key = cv2.waitKey(1)
             #if key & 0xFF == ord('q'):
             #    break
-            if args.image and (frames - frameDetected) < args.skip:
-                print("Writing frame %i to disk, number %i detected" % (frames, framesOut))
-                cv2.imwrite('%05d.png' % framesOut, orig_im)
-                frameDetected = frames
-                framesOut += 1
             #out.write(orig_im)
             frames += 1
             #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
