@@ -58,6 +58,13 @@ def write(x, img, frame_no):
     cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
     return img
 
+def extract_markers(result):
+    c1 = tuple(result[1:3].int())
+    c2 = tuple(result[3:5].int())
+    cls = int(result[-1])
+    label = "{0}".format(classes[cls])
+    return {'x': int(c1[0]), 'y': int(c1[1]), 'h': int(c2[0]), 'w': int(c2[1]), 'type': label}
+
 def arg_parse():
     """
     Parse arguements to the detect module
@@ -85,6 +92,7 @@ def arg_parse():
     parser.add_argument("--frame-image", dest="image", default=False, help="Save image of detected frame", type=bool)
     parser.add_argument("--frame-skip", dest="skip", default=1, help="Skip N number of detected frames", type=int)
     return parser.parse_args()
+
 
 
 if __name__ == '__main__':
@@ -119,8 +127,11 @@ if __name__ == '__main__':
     model.eval()
     
     videofile = args.video
+
     print(args.image)
     cap = cv2.VideoCapture(videofile)
+    videoData = {'video_file': args.video, 'frame_data': [], 'fps': cap.get(cv2.CAP_PROP_FPS)}
+
     #fourcc = cv2.VideoWriter_fourcc(*'X265') # invalid fourcc, but it forces GPU usage for me *shrug*
     #out = cv2.VideoWriter('train.avi',fourcc, 30.0, (480,360))
     assert cap.isOpened(), 'Cannot capture source'
@@ -136,14 +147,15 @@ if __name__ == '__main__':
             
 
             img, orig_im, dim = prep_image(frame, inp_dim)
-
-            im_dim = torch.FloatTensor(dim).repeat(1,2)
-
+            
+            im_dim = torch.FloatTensor(dim).repeat(1,2)                        
+            
+            
             if CUDA:
                 im_dim = im_dim.cuda()
                 img = img.cuda()
-
-            with torch.no_grad():
+            
+            with torch.no_grad():   
                 output = model(Variable(img), CUDA)
             output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
 
@@ -180,6 +192,10 @@ if __name__ == '__main__':
             #IPython.embed()
             list(map(lambda x: write(x, orig_im, frames), output))
 
+            writeable = list(map(extract_markers, output))
+            
+            frame_info = {'frame_no': frames, 'detections': writeable}
+            videoData['frame_data'].append(frame_info)
             clocky = False
             for j in output:
                 if j[-1] == 74:
@@ -197,8 +213,10 @@ if __name__ == '__main__':
             #out.write(orig_im)
             frames += 1
             #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
-            
-            
         else:
             break
-out.release()
+
+    import json
+    with open('out.json', 'w') as outfile:
+        json.dump(videoData, outfile)
+
