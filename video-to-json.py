@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
             writeable = list(map(extract_markers, output))
             
-            frame_info = {'frame_no': frames, 'detections': writeable}
+            frame_info = {'frame_no': int(frames), 'detections': writeable}
             videoData['frame_data'].append(frame_info)
             clocky = False
             for j in output:
@@ -218,5 +218,5 @@ if __name__ == '__main__':
 
     import json
     with open('out.json', 'w') as outfile:
-        json.dump(videoData, outfile)
+        json.dump(videoData, outfile, indent=2)
 
