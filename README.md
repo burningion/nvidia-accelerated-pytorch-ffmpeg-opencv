@@ -38,3 +38,4 @@ Remember, you can also mount directories and open up ports if you want to run Ju
 ```bash
 $ nvidia-docker run -p 8888:8888/tcp -it -v localdir:/workspace/localdir_in_container ffmpegpytorch /bin/bash
 ```
+
