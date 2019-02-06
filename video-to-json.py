@@ -14,6 +14,8 @@ import random
 import pickle as pkl
 import argparse
 
+import requests
+
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -91,6 +93,7 @@ def arg_parse():
                         default = "416", type = str)
     parser.add_argument("--frame-image", dest="image", default=False, help="Save image of detected frame", type=bool)
     parser.add_argument("--frame-skip", dest="skip", default=1, help="Skip N number of detected frames", type=int)
+    parser.add_argument("--post-url", dest="post_url", help="URL to POST JSON back to")
     return parser.parse_args()
 
 
@@ -217,6 +220,7 @@ if __name__ == '__main__':
             break
 
     import json
+    requests.post(args.post_url, json=videoData)
     with open('out.json', 'w') as outfile:
         json.dump(videoData, outfile, indent=2)
 
