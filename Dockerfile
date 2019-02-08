@@ -35,6 +35,7 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 RUN chmod +x /usr/bin/tini
 ENTRYPOINT ["/usr/bin/tini", "--"]
 COPY app.py .
+COPY video-to-json.py /workspace/pytorch-yolo-v3
 COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 EXPOSE 5007

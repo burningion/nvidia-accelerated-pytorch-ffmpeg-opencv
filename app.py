@@ -47,8 +47,9 @@ except:
 @app.route('/video-inference', methods=['POST'])
 def video_inference():
     params = request.get_json()
-    subprocess.call(['python3',
-                     'video-to-json.py',
+    os.chdir('/workspace/pytorch-yolo-v3/')
+    subprocess.Popen(['python3',
+                     '/workspace/pytorch-yolo-v3/video-to-json.py',
                      '--video',
                      params['filename'],
                      '--post-url',
