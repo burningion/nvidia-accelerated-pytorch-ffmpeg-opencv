@@ -51,6 +51,8 @@ def video_inference():
     params = request.get_json()
     os.chdir('/workspace/pytorch-yolo-v3/')
     span = tracer.current_span()
+    logger.info('Span ID and trace Id: %s %s' % (span.context.span_id, span.context.trace_id),
+                extra={'job_category': 'inference', 'logger.name': 'gpu_logger'})
 
     subprocess.Popen(['python3',
                      '/workspace/pytorch-yolo-v3/video-to-json.py',

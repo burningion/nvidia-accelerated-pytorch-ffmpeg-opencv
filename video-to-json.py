@@ -118,10 +118,10 @@ def create_context(trace_id, span_id, priority):
 
 if __name__ == '__main__':
     args = arg_parse()
-    span = tracer.trace("web.request", service="yolo-inference-process")
     if args.trace_id:
         context = create_context(args.trace_id, args.parent_id, args.sampling_priority)
         tracer.context_provider.activate(context)
+    span = tracer.trace("web.request", service="yolo-inference-process")
     confidence = float(args.confidence)
     nms_thesh = float(args.nms_thresh)
     start = 0
@@ -240,10 +240,10 @@ if __name__ == '__main__':
             #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
         else:
             break
-    span.finish()
+    
     import json
     requests.post(args.post_url, json=videoData)
-    
+    span.finish()
     with open('out.json', 'w') as outfile:
         json.dump(videoData, outfile, indent=2)
 

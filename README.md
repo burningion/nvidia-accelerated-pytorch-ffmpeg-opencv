@@ -39,3 +39,12 @@ Remember, you can also mount directories and open up ports if you want to run Ju
 $ nvidia-docker run -p 8888:8888/tcp -it -v localdir:/workspace/localdir_in_container ffmpegpytorch /bin/bash
 ```
 
+## Inference API
+
+I've added the start of an inference API. The way you call it is:
+
+```bash
+$ curl --header "Content-Type: application/json"   --request POST   --data '{"filename": "/downloads/cuckoo.mp4", "postback_url": "http://10.152.183.141:5005/video-inference"}' http://10.152.183.139:5007/video-inference
+```
+
+The `postback_url` will get posted with the results of the inference in the video.
