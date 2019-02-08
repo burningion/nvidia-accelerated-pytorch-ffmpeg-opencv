@@ -44,10 +44,20 @@ try:
 except:
     print("File logger not configured")
 
+@app.route('/video-inference', methods=['POST'])
+def video_inference():
+    params = request.get_json()
+    subprocess.call(['python3',
+                     'video-to-json.py',
+                     '--video',
+                     params['filename'],
+                     '--post-url',
+                     params['postback_url']])
+    return jsonify({'message': 'received'})
 
 @app.route('/')
 def hello_world():
     return 'Hello world!'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=8069)
+    app.run(host='0.0.0.0',port=5007)

@@ -34,5 +34,11 @@ ENV TINI_VERSION v0.6.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 ENTRYPOINT ["/usr/bin/tini", "--"]
-EXPOSE 8888
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
+COPY app.py .
+COPY requirements.txt .
+RUN python3 -m pip install -r requirements.txt
+EXPOSE 5007
+CMD ["python3", "app.py"]
+# uncomment below and comment above to reenable jupyter notebook
+#EXPOSE 8888
+#CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]

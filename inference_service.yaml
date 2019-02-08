@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inferenceapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inferenceapp
+  template:
+    metadata:
+      labels:
+        app: inferenceapp
+    spec:
+      containers:
+      - name: inferenceapp
+        image: ffmpegpytorch:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5007
+        volumeMounts:
+        - name: flasklogs
+          mountPath: /var/log/flask
+        - name: videos
+          mountPath: /downloads
+        env:
+        - name: DD_AGENT_SERVICE_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_AGENT_SERVICE_PORT
+          value: '8126'
+        - name: DOGSTATSD_HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: DD_LOGS_INJECTION
+          value: 'true'
+      volumes:
+        - hostPath:
+            path: /var/log/flask
+          name: flasklogs
+        - hostPath:
+            path: /media/stankley/Samsung_T5/downloaded-videos
+          name: videos
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inferenceapp
+spec:
+  selector:
+    app: inferenceapp
+  ports:
+  - name: http
+    protocol: TCP
+    port: 5007
+  type: NodePort
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: cm-datadog-confd
+  namespace: default
+data:
+  flasklogs.yaml: |-
+    init_config:
+    instances:
+    logs:
+    - type: file
+      path: /var/log/flask/mylog.json
+      service: flask
+      source: python
+      sourcecategory: sourcecode 
