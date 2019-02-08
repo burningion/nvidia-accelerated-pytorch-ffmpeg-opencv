@@ -34,10 +34,10 @@ ENV TINI_VERSION v0.6.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 ENTRYPOINT ["/usr/bin/tini", "--"]
-COPY app.py .
-COPY video-to-json.py /workspace/pytorch-yolo-v3
 COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
+COPY app.py .
+COPY video-to-json.py /workspace/pytorch-yolo-v3
 EXPOSE 5007
 CMD ["python3", "app.py"]
 # uncomment below and comment above to reenable jupyter notebook

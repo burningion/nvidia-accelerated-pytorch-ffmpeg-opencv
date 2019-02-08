@@ -4,6 +4,7 @@ import subprocess
 from datadog import initialize, statsd
 from ddtrace import tracer, patch
 from ddtrace.contrib.flask import TraceMiddleware
+from ddtrace.context import Context
 
 try:
     initialize(statsd_host=os.environ['DOGSTATSD_HOST_IP'], statsd_port=8125)
@@ -44,16 +45,26 @@ try:
 except:
     print("File logger not configured")
 
+
 @app.route('/video-inference', methods=['POST'])
 def video_inference():
     params = request.get_json()
     os.chdir('/workspace/pytorch-yolo-v3/')
+    span = tracer.current_span()
+
     subprocess.Popen(['python3',
                      '/workspace/pytorch-yolo-v3/video-to-json.py',
                      '--video',
                      params['filename'],
                      '--post-url',
-                     params['postback_url']])
+                     params['postback_url'],
+                     '--trace-id',
+                     str(span.context.trace_id),
+                     '--parent-id',
+                     str(span.context.span_id),
+                     '--sampling-priority',
+                     str(span.context.sampling_priority)])
+
     return jsonify({'message': 'received'})
 
 @app.route('/')

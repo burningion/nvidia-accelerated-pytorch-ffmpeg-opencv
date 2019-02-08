@@ -16,6 +16,19 @@ import argparse
 
 import requests
 
+from ddtrace import tracer, patch_all
+from ddtrace.context import Context
+
+try:
+    tracer.configure(
+    hostname=os.environ['DD_AGENT_SERVICE_HOST'],
+    port=os.environ['DD_AGENT_SERVICE_PORT']
+)
+
+except:
+    print("No environment variables for Datadog set. App won't be instrumented.")
+
+patch_all()
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -94,12 +107,21 @@ def arg_parse():
     parser.add_argument("--frame-image", dest="image", default=False, help="Save image of detected frame", type=bool)
     parser.add_argument("--frame-skip", dest="skip", default=1, help="Skip N number of detected frames", type=int)
     parser.add_argument("--post-url", dest="post_url", help="URL to POST JSON back to")
+    parser.add_argument("--trace-id", dest="trace_id", help="Trace ID")
+    parser.add_argument("--parent-id", dest="parent_id", help="Parent Trace ID")
+    parser.add_argument("--sampling-priority", dest="sampling_priority", help="Trace Sampling Priority")
     return parser.parse_args()
 
 
+def create_context(trace_id, span_id, priority):
+    return Context(trace_id=trace_id, span_id=span_id, sampling_priority=priority)
 
 if __name__ == '__main__':
     args = arg_parse()
+    span = tracer.trace("web.request", service="yolo-inference-process")
+    if args.trace_id:
+        context = create_context(args.trace_id, args.parent_id, args.sampling_priority)
+        tracer.context_provider.activate(context)
     confidence = float(args.confidence)
     nms_thesh = float(args.nms_thresh)
     start = 0
@@ -218,9 +240,10 @@ if __name__ == '__main__':
             #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
         else:
             break
-
+    span.finish()
     import json
     requests.post(args.post_url, json=videoData)
+    
     with open('out.json', 'w') as outfile:
         json.dump(videoData, outfile, indent=2)
 
