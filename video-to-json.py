@@ -1,6 +1,6 @@
 from __future__ import division
 import os
-from ddtrace import tracer, patch
+from ddtrace import tracer, patch, config
 from ddtrace.context import Context
 
 try:
@@ -10,6 +10,7 @@ except:
     print("No environment variables for Datadog set. App won't be instrumented.")
 
 patch(requests=True)
+config.request['distributed_tracing'] = True
 
 import IPython
 import time
@@ -239,7 +240,7 @@ if __name__ == '__main__':
 
         import json
         requests.post(args.post_url, json=videoData)
-        
+
         with open('out.json', 'w') as outfile:
             json.dump(videoData, outfile, indent=2)
 
