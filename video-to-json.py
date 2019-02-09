@@ -1,6 +1,6 @@
 from __future__ import division
 import os
-from ddtrace import tracer, patch_all
+from ddtrace import tracer, patch
 from ddtrace.context import Context
 
 try:
@@ -9,7 +9,7 @@ try:
 except:
     print("No environment variables for Datadog set. App won't be instrumented.")
 
-patch_all()
+patch(requests=True)
 
 import IPython
 import time
