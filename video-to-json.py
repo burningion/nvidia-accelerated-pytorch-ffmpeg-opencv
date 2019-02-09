@@ -1,4 +1,16 @@
 from __future__ import division
+import os
+from ddtrace import tracer, patch_all
+from ddtrace.context import Context
+
+try:
+    tracer.configure(hostname=os.environ['DD_AGENT_SERVICE_HOST'], port=os.environ['DD_AGENT_SERVICE_PORT'])
+
+except:
+    print("No environment variables for Datadog set. App won't be instrumented.")
+
+patch_all()
+
 import IPython
 import time
 import torch 
@@ -15,20 +27,6 @@ import pickle as pkl
 import argparse
 
 import requests
-
-from ddtrace import tracer, patch_all
-from ddtrace.context import Context
-
-try:
-    tracer.configure(
-    hostname=os.environ['DD_AGENT_SERVICE_HOST'],
-    port=os.environ['DD_AGENT_SERVICE_PORT']
-)
-
-except:
-    print("No environment variables for Datadog set. App won't be instrumented.")
-
-patch_all()
 
 def get_test_input(input_dim, CUDA):
     img = cv2.imread("dog-cycle-car.png")
@@ -112,138 +110,136 @@ def arg_parse():
     parser.add_argument("--sampling-priority", dest="sampling_priority", help="Trace Sampling Priority")
     return parser.parse_args()
 
-
-def create_context(trace_id, span_id, priority):
-    return Context(trace_id=trace_id, span_id=span_id, sampling_priority=priority)
-
 if __name__ == '__main__':
     args = arg_parse()
+    
     if args.trace_id:
-        context = create_context(args.trace_id, args.parent_id, args.sampling_priority)
+        context = Context(trace_id=int(args.trace_id), span_id=int(args.parent_id), sampling_priority=int(args.sampling_priority))
         tracer.context_provider.activate(context)
-    span = tracer.trace("web.request", service="yolo-inference-process")
-    confidence = float(args.confidence)
-    nms_thesh = float(args.nms_thresh)
-    start = 0
-
-    CUDA = torch.cuda.is_available()
-
-    num_classes = 80
-
     
-    bbox_attrs = 5 + num_classes
-    
-    print("Loading network.....")
-    model = Darknet(args.cfgfile)
-    model.load_weights(args.weightsfile)
-    print("Network successfully loaded")
+    with tracer.trace("gpu.yolovideoinference", service="yolo-inference-process") as span:
+        confidence = float(args.confidence)
+        nms_thesh = float(args.nms_thresh)
+        start = 0
 
-    model.net_info["height"] = args.reso
-    inp_dim = int(model.net_info["height"])
-    assert inp_dim % 32 == 0 
-    assert inp_dim > 32
+        CUDA = torch.cuda.is_available()
 
-    if CUDA:
-        model.cuda()
-        print("Using cuda!")
-    
-    model(get_test_input(inp_dim, CUDA), CUDA)
+        num_classes = 80
 
-    model.eval()
-    
-    videofile = args.video
 
-    print(args.image)
-    cap = cv2.VideoCapture(videofile)
-    videoData = {'video_file': args.video, 'frame_data': [], 'fps': cap.get(cv2.CAP_PROP_FPS)}
+        bbox_attrs = 5 + num_classes
 
-    #fourcc = cv2.VideoWriter_fourcc(*'X265') # invalid fourcc, but it forces GPU usage for me *shrug*
-    #out = cv2.VideoWriter('train.avi',fourcc, 30.0, (480,360))
-    assert cap.isOpened(), 'Cannot capture source'
-    
-    frames = 0
-    frameDetected = -1
-    framesOut = 1
-    start = time.time()    
-    while cap.isOpened():
-        
-        ret, frame = cap.read()
-        if ret:
-            
+        print("Loading network.....")
+        model = Darknet(args.cfgfile)
+        model.load_weights(args.weightsfile)
+        print("Network successfully loaded")
 
-            img, orig_im, dim = prep_image(frame, inp_dim)
-            
-            im_dim = torch.FloatTensor(dim).repeat(1,2)                        
-            
-            
-            if CUDA:
-                im_dim = im_dim.cuda()
-                img = img.cuda()
-            
-            with torch.no_grad():   
-                output = model(Variable(img), CUDA)
-            output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
+        model.net_info["height"] = args.reso
+        inp_dim = int(model.net_info["height"])
+        assert inp_dim % 32 == 0 
+        assert inp_dim > 32
 
-            if type(output) == int:
-                frames += 1
-                continue
-                #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
-                '''
-                cv2.imshow("frame", orig_im)
-                key = cv2.waitKey(1)
-                if key & 0xFF == ord('q'):
-                    break
-                continue
-                '''
+        if CUDA:
+            model.cuda()
+            print("Using cuda!")
+
+        model(get_test_input(inp_dim, CUDA), CUDA)
+
+        model.eval()
+
+        videofile = args.video
+
+        print(args.image)
+        cap = cv2.VideoCapture(videofile)
+        videoData = {'video_file': args.video, 'frame_data': [], 'fps': cap.get(cv2.CAP_PROP_FPS)}
+
+        #fourcc = cv2.VideoWriter_fourcc(*'X265') # invalid fourcc, but it forces GPU usage for me *shrug*
+        #out = cv2.VideoWriter('train.avi',fourcc, 30.0, (480,360))
+        assert cap.isOpened(), 'Cannot capture source'
+
+        frames = 0
+        frameDetected = -1
+        framesOut = 1
+        start = time.time()    
+        while cap.isOpened():
+
+            ret, frame = cap.read()
+            if ret:
+
+
+                img, orig_im, dim = prep_image(frame, inp_dim)
+
+                im_dim = torch.FloatTensor(dim).repeat(1,2)                        
+
+
+                if CUDA:
+                    im_dim = im_dim.cuda()
+                    img = img.cuda()
+
+                with torch.no_grad():   
+                    output = model(Variable(img), CUDA)
+                output = write_results(output, confidence, num_classes, nms = True, nms_conf = nms_thesh)
+
+                if type(output) == int:
+                    frames += 1
+                    continue
+                    #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+                    '''
+                    cv2.imshow("frame", orig_im)
+                    key = cv2.waitKey(1)
+                    if key & 0xFF == ord('q'):
+                        break
+                    continue
+                    '''
+                    #out.write(orig_im)
+
+
+
+
+                im_dim = im_dim.repeat(output.size(0), 1)
+                scaling_factor = torch.min(inp_dim/im_dim,1)[0].view(-1,1)
+
+                output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim[:,0].view(-1,1))/2
+                output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim[:,1].view(-1,1))/2
+
+                output[:,1:5] /= scaling_factor
+
+                for i in range(output.shape[0]):
+                    output[i, [1,3]] = torch.clamp(output[i, [1,3]], 0.0, im_dim[i,0])
+                    output[i, [2,4]] = torch.clamp(output[i, [2,4]], 0.0, im_dim[i,1])
+
+                classes = load_classes('data/coco.names')
+                colors = pkl.load(open("pallete", "rb"))
+                #IPython.embed()
+                list(map(lambda x: write(x, orig_im, frames), output))
+
+                writeable = list(map(extract_markers, output))
+
+                frame_info = {'frame_no': int(frames), 'detections': writeable}
+                videoData['frame_data'].append(frame_info)
+                clocky = False
+                for j in output:
+                    if j[-1] == 74:
+                        clocky = True
+
+                if args.image and (frames - frameDetected) > args.skip and clocky:
+                    print("Writing frame %i to disk, number %i detected" % (frames, framesOut))
+                    cv2.imwrite('../input/stills/%05d.png' % framesOut, orig_im)
+                    frameDetected = frames
+                    framesOut += 1
+                #cv2.imshow("frame", orig_im)
+                #key = cv2.waitKey(1)
+                #if key & 0xFF == ord('q'):
+                #    break
                 #out.write(orig_im)
-            
-            
+                frames += 1
+                #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
+            else:
+                break
 
-            
-            im_dim = im_dim.repeat(output.size(0), 1)
-            scaling_factor = torch.min(inp_dim/im_dim,1)[0].view(-1,1)
-            
-            output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim[:,0].view(-1,1))/2
-            output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim[:,1].view(-1,1))/2
-            
-            output[:,1:5] /= scaling_factor
-    
-            for i in range(output.shape[0]):
-                output[i, [1,3]] = torch.clamp(output[i, [1,3]], 0.0, im_dim[i,0])
-                output[i, [2,4]] = torch.clamp(output[i, [2,4]], 0.0, im_dim[i,1])
-            
-            classes = load_classes('data/coco.names')
-            colors = pkl.load(open("pallete", "rb"))
-            #IPython.embed()
-            list(map(lambda x: write(x, orig_im, frames), output))
-
-            writeable = list(map(extract_markers, output))
-            
-            frame_info = {'frame_no': int(frames), 'detections': writeable}
-            videoData['frame_data'].append(frame_info)
-            clocky = False
-            for j in output:
-                if j[-1] == 74:
-                    clocky = True
-            
-            if args.image and (frames - frameDetected) > args.skip and clocky:
-                print("Writing frame %i to disk, number %i detected" % (frames, framesOut))
-                cv2.imwrite('../input/stills/%05d.png' % framesOut, orig_im)
-                frameDetected = frames
-                framesOut += 1
-            #cv2.imshow("frame", orig_im)
-            #key = cv2.waitKey(1)
-            #if key & 0xFF == ord('q'):
-            #    break
-            #out.write(orig_im)
-            frames += 1
-            #print("FPS of the video is {:5.2f}".format( frames / (time.time() - start)))
-        else:
-            break
-    
-    import json
-    requests.post(args.post_url, json=videoData)
-    span.finish()
-    with open('out.json', 'w') as outfile:
-        json.dump(videoData, outfile, indent=2)
+        import json
+        requests.post(args.post_url, json=videoData)
+        
+        with open('out.json', 'w') as outfile:
+            json.dump(videoData, outfile, indent=2)
 

@@ -5,6 +5,7 @@ from datadog import initialize, statsd
 from ddtrace import tracer, patch
 from ddtrace.contrib.flask import TraceMiddleware
 from ddtrace.context import Context
+from ddtrace.ext.priority import USER_KEEP
 
 try:
     initialize(statsd_host=os.environ['DOGSTATSD_HOST_IP'], statsd_port=8125)
@@ -65,7 +66,7 @@ def video_inference():
                      '--parent-id',
                      str(span.context.span_id),
                      '--sampling-priority',
-                     str(span.context.sampling_priority)])
+                     str(USER_KEEP)])
 
     return jsonify({'message': 'received'})
 
