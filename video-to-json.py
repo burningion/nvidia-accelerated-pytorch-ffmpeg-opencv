@@ -113,7 +113,9 @@ def arg_parse():
 
 if __name__ == '__main__':
     args = arg_parse()
-    
+    has_clocks = False
+    clock_frames = 0
+
     if args.trace_id:
         context = Context(trace_id=int(args.trace_id), span_id=int(args.parent_id), sampling_priority=int(args.sampling_priority))
         tracer.context_provider.activate(context)
@@ -152,7 +154,7 @@ if __name__ == '__main__':
 
         print(args.image)
         cap = cv2.VideoCapture(videofile)
-        videoData = {'video_file': args.video, 'frame_data': [], 'fps': cap.get(cv2.CAP_PROP_FPS)}
+        videoData = {'video_file': args.video, 'frame_data': [], 'fps': cap.get(cv2.CAP_PROP_FPS), 'has_clock': False, 'clock_frames': 0}
 
         #fourcc = cv2.VideoWriter_fourcc(*'X265') # invalid fourcc, but it forces GPU usage for me *shrug*
         #out = cv2.VideoWriter('train.avi',fourcc, 30.0, (480,360))
@@ -222,6 +224,8 @@ if __name__ == '__main__':
                 for j in output:
                     if j[-1] == 74:
                         clocky = True
+                        has_clocks = True
+                        clock_frames += 1
 
                 if args.image and (frames - frameDetected) > args.skip and clocky:
                     print("Writing frame %i to disk, number %i detected" % (frames, framesOut))
@@ -239,6 +243,8 @@ if __name__ == '__main__':
                 break
 
         import json
+        videoData['has_clock'] = has_clocks
+        videoData['clock_frames'] = clock_frames
         requests.post(args.post_url, json=videoData)
 
         with open('out.json', 'w') as outfile:
