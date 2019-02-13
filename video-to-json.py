@@ -242,11 +242,8 @@ if __name__ == '__main__':
             else:
                 break
 
-        import json
         videoData['has_clock'] = has_clocks
         videoData['clock_frames'] = clock_frames
         requests.post(args.post_url, json=videoData)
-
-        with open('out.json', 'w') as outfile:
-            json.dump(videoData, outfile, indent=2)
+        requests.get('http://localhost:5007/next-video-inference')
 
