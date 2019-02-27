@@ -1,5 +1,5 @@
 FROM nvcr.io/nvidia/pytorch:18.11-py3
-RUN apt-get update && apt-get -y install autoconf automake build-essential libass-dev libtool  pkg-config texinfo zlib1g-dev cmake mercurial libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev  libxvidcore-dev libx264-dev libatlas-base-dev libvpx-dev gfortran unzip 
+RUN apt-get update && apt-get -y install autoconf automake build-essential libass-dev libtool  pkg-config texinfo zlib1g-dev cmake mercurial libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev  libxvidcore-dev libx264-dev libatlas-base-dev libopus-dev libvpx-dev gfortran unzip 
 RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 RUN cd nv-codec-headers && make && make install
 RUN git clone https://git.ffmpeg.org/ffmpeg.git
