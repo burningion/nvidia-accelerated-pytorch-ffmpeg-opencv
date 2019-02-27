@@ -38,8 +38,9 @@ COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 COPY app.py .
 COPY video-to-json.py /workspace/pytorch-yolo-v3
+COPY splitter.py .
 EXPOSE 5007
-CMD ["python3", "app.py"]
+CMD ["ddtrace-run", "python3", "app.py"]
 # uncomment below and comment above to reenable jupyter notebook
 #EXPOSE 8888
 #CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
