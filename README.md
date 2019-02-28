@@ -6,15 +6,18 @@ It starts with the [NVIDIA Pytorch](https://ngc.nvidia.com/catalog/containers/nv
 
 Running it via `nvidia-docker` gives us hardware access to the GPU, and lets us keep our host operating system clean / independent. 
 
-This repo uses the latest release of Python 3 and Pytorch, adding hardware acceleration for the latest consumer NVIDIA GPU at this time (the 2080ti).
+This repo uses the latest release of Python 3 and Pytorch, adding hardware acceleration for the latest consumer NVIDIA GPU at this time (the 2080ti). Please note, in order for the GPU accelerated encoding and decoding to work, you'll also need to have at least the Linux Driver 
 
 # Creating And Running the Image
 
-Right now there are just two things to be aware of. In our `make`, we're doing `-j4`, for the 4 CPUs I have on my dev machine. You may want to change this to something higher than that for running locally.
+For accerated encoding and decoding, your host machine must have the NVIDIA accelerated hardware encoder and decoder installed. The command to install is listed below, but may be different depending on the driver version you have installed.
+
+As for building the image, right now there are just two things to be aware of. In our `make`, we're doing `-j4`, for the 4 CPUs I have on my dev machine. You may want to change this to something higher than that for running locally.
 
 Besides that, this takes a __while__ to build. So uh, grab a cup of coffee or two...
 
 ```bash
+$ sudo apt-get install libnvidia-decode-390 libnvidia-decode-390
 $ docker build -t ffmpegpytorch .
 $ nvidia-docker run -it ffmpegpytorch /bin/bash
 ```

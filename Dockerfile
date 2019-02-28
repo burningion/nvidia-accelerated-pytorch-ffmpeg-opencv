@@ -1,4 +1,5 @@
-FROM nvcr.io/nvidia/pytorch:18.11-py3
+#FROM nvcr.io/nvidia/pytorch:18.11-py3
+FROM nvcr.io/nvidia/pytorch:19.02-py3
 RUN apt-get update && apt-get -y install autoconf automake build-essential libass-dev libtool  pkg-config texinfo zlib1g-dev cmake mercurial libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev  libxvidcore-dev libx264-dev libx265-dev libnuma-dev libatlas-base-dev libopus-dev libvpx-dev gfortran unzip 
 RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 RUN cd nv-codec-headers && make && make install
@@ -21,7 +22,7 @@ RUN cd opencv && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=RELEASE \
   -D CUDA_FAST_MATH=1 \
   -D WITH_CUBLAS=1 \
   -D WITH_FFMPEG=ON \
-	-D BUILD_EXAMPLES=ON .. && make -j4 && make install
+	-D BUILD_EXAMPLES=ON .. && make -j8 && make install
 RUN cd /workspace/opencv/build/modules/python3 && make && make install
 RUN ln -s /usr/local/python/python-3.6/cv2.cpython-36m-x86_64-linux-gnu.so /opt/conda/lib/python3.6/site-packages/cv2.so
 RUN pip install pandas jupyter ipywidgets
@@ -39,6 +40,7 @@ COPY app.py .
 COPY video-to-json.py /workspace/pytorch-yolo-v3
 COPY splitter.py .
 EXPOSE 5007
+ENV NVIDIA_VISIBLE_DEVICES all
 CMD ["ddtrace-run", "python3", "app.py"]
 # uncomment below and comment above to reenable jupyter notebook
 #EXPOSE 8888

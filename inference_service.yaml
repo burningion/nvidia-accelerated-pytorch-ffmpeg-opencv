@@ -36,6 +36,8 @@ spec:
               fieldPath: status.hostIP
         - name: DD_LOGS_INJECTION
           value: 'true'
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: 'all'
       volumes:
         - hostPath:
             path: /var/log/flask
