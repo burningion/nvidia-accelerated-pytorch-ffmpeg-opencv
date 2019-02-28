@@ -19,6 +19,9 @@ for inference in b['inferences']:
         #length = 2
         #if get_sec(inference['clock_segments'][i]['length']) >= 2:
         #    length = get_sec(inference['clock_segments'][i]['length'])
-        command = f"ffmpeg -hwaccel cuvid -c:v h264_cuvid -i '{inference['filename']}' -ss {inference['clock_segments'][i]['start']} -t  {inference['clock_segments'][i]['length']} -f mp4 -c:v h264_nvenc -preset slow -acodec aac /downloads/slices/{counter:05d}.mp4"
+        if inference['filename'][-4:] == 'webm':
+            command = f"ffmpeg -hwaccel cuvid -c:v vp8_cuvid -i '{inference['filename']}' -ss {inference['clock_segments'][i]['start']} -t  {inference['clock_segments'][i]['length']} -f mp4 -filter:v scale_npp=w=1280:h=720:format=yuv420p:interp_algo=lanczos -c:v h264_nvenc -preset slow -acodec aac -r 30 /downloads/slices/{counter:05d}.mp4 -hide_banner"
+        else:
+            command = f"ffmpeg -hwaccel cuvid -c:v h264_cuvid -i '{inference['filename']}' -ss {inference['clock_segments'][i]['start']} -t  {inference['clock_segments'][i]['length']} -f mp4 -filter:v scale_npp=w=1280:h=720:format=yuv420p:interp_algo=lanczos -c:v h264_nvenc -preset slow -acodec aac -r 30 /downloads/slices/{counter:05d}.mp4 -hide_banner"
         subprocess.call(shlex.split(command))
         counter += 1
