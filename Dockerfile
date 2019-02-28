@@ -39,6 +39,7 @@ RUN python3 -m pip install -r requirements.txt
 COPY app.py .
 COPY video-to-json.py /workspace/pytorch-yolo-v3
 COPY splitter.py .
+COPY joiner.py .
 EXPOSE 5007
 ENV NVIDIA_VISIBLE_DEVICES all
 CMD ["ddtrace-run", "python3", "app.py"]
