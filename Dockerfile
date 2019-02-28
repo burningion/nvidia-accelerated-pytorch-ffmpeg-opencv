@@ -1,9 +1,9 @@
 FROM nvcr.io/nvidia/pytorch:18.11-py3
-RUN apt-get update && apt-get -y install autoconf automake build-essential libass-dev libtool  pkg-config texinfo zlib1g-dev cmake mercurial libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev  libxvidcore-dev libx264-dev libatlas-base-dev libopus-dev libvpx-dev gfortran unzip 
+RUN apt-get update && apt-get -y install autoconf automake build-essential libass-dev libtool  pkg-config texinfo zlib1g-dev cmake mercurial libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev  libxvidcore-dev libx264-dev libx265-dev libnuma-dev libatlas-base-dev libopus-dev libvpx-dev gfortran unzip 
 RUN git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 RUN cd nv-codec-headers && make && make install
 RUN git clone https://git.ffmpeg.org/ffmpeg.git
-RUN cd ffmpeg &&  ./configure  --enable-shared --disable-static --enable-cuda --enable-cuvid --enable-libnpp --enable-libvpx --enable-libopus --enable-libx264  --enable-gpl --enable-pic --enable-libass --enable-nvenc --enable-nonfree --extra-cflags="-I/usr/local/cuda/include/ -fPIC" --extra-ldflags="-L/usr/local/cuda/lib64/ -Wl,-Bsymbolic"  && make -j4  && make install
+RUN cd ffmpeg &&  ./configure  --enable-shared --disable-static --enable-cuda --enable-cuvid --enable-libnpp --enable-libvpx --enable-libopus --enable-libx264  --enable-gpl --enable-pic --enable-libass --enable-nvenc --enable-nonfree --enable-libx265 --extra-cflags="-I/usr/local/cuda/include/ -fPIC" --extra-ldflags="-L/usr/local/cuda/lib64/ -Wl,-Bsymbolic"  && make -j4  && make install
 RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.0.0.zip && unzip opencv.zip && mv opencv-4.0.0 opencv
 RUN wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.0.0.zip && unzip opencv_contrib.zip && mv opencv_contrib-4.0.0 opencv_contrib
 RUN cd opencv && mkdir build && cd build && cmake -D CMAKE_BUILD_TYPE=RELEASE \
