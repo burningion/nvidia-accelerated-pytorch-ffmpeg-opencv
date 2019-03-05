@@ -21,6 +21,13 @@ def getHrMinSec(seconds):
 
 for inference in b['inferences']:
     for i in range(len(inference['clock_segments'])):
+        r = requests.get(f'{scraperURL}/snippets?video_id={inference["video_id"]}&start={inference["clock_segments"][i]["start"]}')
+        exists = r.json()
+
+        if len(exists.values()) > 0:
+            print('Skipping existing snippet')
+            continue
+
         length = getHrMinSec(10)
         if get_sec(inference['clock_segments'][i]['length']) >= 10:
             length = getHrMinSec(10)
