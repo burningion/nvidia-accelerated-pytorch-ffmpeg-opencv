@@ -1,13 +1,27 @@
 import subprocess
-import glob
+import requests
 import random
+import os
 
-filelist = glob.glob('*.mp4')
+scraperURL = 'http://' + os.environ['SCRAPERAPP_SERVICE_HOST'] + ':' + os.environ['SCRAPERAPP_SERVICE_PORT']
+
+req = requests.get(f'{scraperURL}/snippets')
+snippets = req.json()['snippets']
+
+print(snippets)
+
+def getUniqueVideo(vidlist, snippets):
+    while True:
+        vidCandidate = random.choice(snippets)
+        if vidCandidate['video'] not in vidlist:
+            return vidCandidate
 
 with open('/downloads/slices/filelist.txt', 'w') as f:
-    for i in range(100):
-        f.write("file %s\n" % random.choice(filelist))
+    videoList = []
 
+    # need at least 50 videos or we loop forever :)
+    for i in range(50):
+        video = getUniqueVideo(videoList, snippets)
+        videoList.append(video['video'])
+        f.write(f"file {video['filename']}\n")
 f.close()
-    
-        

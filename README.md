@@ -51,3 +51,9 @@ $ curl --header "Content-Type: application/json"   --request POST   --data '{"fi
 ```
 
 The `postback_url` will get posted with the results of the inference in the video.
+
+## Splitting and Joining
+
+There are now two new Python files that can be used to create `snippets` of videos featuring a specific feature in a video. For now, I've focused on clocks. You can copy the `splitter.py` and `joiner.py` files into your mounted volume that stores all videos.
+
+Change into that directory on the container, and first run `splitter.py`. It will create a bunch of video snippets under the `slices/` directory. From there, you can run `joiner.py` to hit the `scraper` service, and grab all the unique videos for remixing.
