@@ -7,6 +7,19 @@ metadata:
 spec:
   template:
     metadata:
+      annotations:
+        ad.datadoghq.com/node-exporter.check_names: |
+          ["prometheus"]
+        ad.datadoghq.com/node-exporter.init_configs: |
+          [{}]
+        ad.datadoghq.com/node-exporter.instances: |
+          [
+            {
+              "prometheus_url": "http://%%host%%:9100/metrics",
+              "namespace": "nvidia",
+              "metrics": ["dcgm_thermal_violation", "dcgm_sm_clock", "dcgm_power_violation", "dcgm_power_usage", "dcgm_memory_clock", "dcgm_mem_copy_utilization", "dcgm_gpu_utilization", "dcgm_enc_utilization", "dcgm_dec_utilization"]
+            }
+          ]
       labels:
         app: node-exporter
       name: node-exporter
