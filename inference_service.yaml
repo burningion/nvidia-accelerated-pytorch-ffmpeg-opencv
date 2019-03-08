@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         app: inferenceapp
+      annotations:
+        com.datadoghq.com.ad.logs: '[{"source": "python", "service": "inference-service"}]'
     spec:
       containers:
       - name: inferenceapp
@@ -38,6 +40,8 @@ spec:
           value: 'true'
         - name: NVIDIA_VISIBLE_DEVICES
           value: 'all'
+        - name: DATADOG_SERVICE_NAME
+          value: 'inference-service'
       volumes:
         - hostPath:
             path: /var/log/flask
