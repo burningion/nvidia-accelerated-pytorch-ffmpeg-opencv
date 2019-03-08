@@ -24,11 +24,11 @@ spec:
         - name: videos
           mountPath: /downloads
         env:
-        - name: DD_AGENT_SERVICE_HOST
+        - name: DD_AGENT_HOST
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        - name: DD_AGENT_SERVICE_PORT
+        - name: DD_TRACE_AGENT_PORT
           value: '8126'
         - name: DOGSTATSD_HOST_IP
           valueFrom:
