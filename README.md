@@ -57,3 +57,32 @@ The `postback_url` will get posted with the results of the inference in the vide
 There are now two new Python files that can be used to create `snippets` of videos featuring a specific feature in a video. For now, I've focused on clocks. You can copy the `splitter.py` and `joiner.py` files into your mounted volume that stores all videos.
 
 Change into that directory on the container, and first run `splitter.py`. It will create a bunch of video snippets under the `slices/` directory. From there, you can run `joiner.py` to hit the `scraper` service, and grab all the unique videos for remixing.
+
+
+## Monitoring GPU Usage with NVIDIA DCGM exporter for Prometheus
+
+You'll need to get your nodes with GPUs available within them, and then add a label to have the [NVIDIA DCGM exporter run as a DaemonSet](https://github.com/NVIDIA/gpu-monitoring-tools/tree/master/exporters/prometheus-dcgm) on those pods extracting GPU information.
+
+In my case, running microk8s locally, where my attached machine has a GPU available in k8s:
+
+```bash
+$ microk8s.kubectl get nodes
+NAME       STATUS   ROLES    AGE   VERSION
+stankley   Ready    <none>   48d   v1.13.
+$ microk8s.kubectl label nodes stankley hardware-type=NVIDIAGPU
+$ microk8s.kubectl apply -f node-exporter-daemonset.yaml
+```
+
+When we've added the DaemonSet, we can check to see if it's running and exporting metrics by curling localhost:
+
+```bash
+$ curl -s localhost:9100/metrics | grep dcgm
+# HELP dcgm_app_clock_violation Total throttling duration (in us).
+# TYPE dcgm_app_clock_violation counter
+dcgm_app_clock_violation{gpu="0",uuid="GPU-a612132df-7c52-b181-cf39-28065234123ac8"} -9.134403409224488e+18
+....
+....
+```
+
+With this, we can then extract these metrics with Datadog via annotations and auto-discovery.
+
