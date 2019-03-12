@@ -58,6 +58,11 @@ There are now two new Python files that can be used to create `snippets` of vide
 
 Change into that directory on the container, and first run `splitter.py`. It will create a bunch of video snippets under the `slices/` directory. From there, you can run `joiner.py` to hit the `scraper` service, and grab all the unique videos for remixing.
 
+The `joiner.py` file will create a `videolist.txt`. You can send that to ffmpeg's concat demuxer and generate a new video with the following ffmpeg command:
+
+```bash
+$ ffmpeg -f concat -i videolist.txt -c copy out.mp4
+```
 
 ## Monitoring GPU Usage with NVIDIA DCGM exporter for Prometheus
 
