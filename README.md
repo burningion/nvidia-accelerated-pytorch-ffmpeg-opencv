@@ -1,5 +1,7 @@
 # Pytorch NVIDIA Docker Container with Hardware Accelerated ffmpeg / OpenCV 4
 
+![Architecture of Deep Learning API](https://s3-us-west-2.amazonaws.com/makeartwithpython/the-clock-architecture-wm.png)
+
 This is a work in progress Docker image for a talk demonstrating processing videos with GPUs.
 
 It starts with the [NVIDIA Pytorch](https://ngc.nvidia.com/catalog/containers/nvidia%2Fpytorch) container, and then builds ffmpeg and OpenCV 4.0 from source with hardware acceleration. 
@@ -9,8 +11,6 @@ Running it via `nvidia-docker` gives us hardware access to the GPU, and lets us 
 This repo uses the latest release of Python 3 and Pytorch, adding hardware acceleration for the latest consumer NVIDIA GPU at this time (the 2080ti). Please note, in order for the GPU accelerated encoding and decoding to work, you'll also need to have at least the Linux Driver 
 
 # Creating And Running the Image
-
-![Architecture of Deep Learning API](https://s3-us-west-2.amazonaws.com/makeartwithpython/the-clock-architecture-wm.png)
 
 For accerated encoding and decoding, your host machine must have the NVIDIA accelerated hardware encoder and decoder installed. The command to install is listed below, but may be different depending on the driver version you have installed.
 
