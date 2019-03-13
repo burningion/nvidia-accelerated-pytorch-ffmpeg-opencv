@@ -10,6 +10,8 @@ This repo uses the latest release of Python 3 and Pytorch, adding hardware accel
 
 # Creating And Running the Image
 
+![Architecture of Deep Learning API](https://s3-us-west-2.amazonaws.com/makeartwithpython/the-clock-architecture-wm.png)
+
 For accerated encoding and decoding, your host machine must have the NVIDIA accelerated hardware encoder and decoder installed. The command to install is listed below, but may be different depending on the driver version you have installed.
 
 As for building the image, right now there are just two things to be aware of. In our `make`, we're doing `-j4`, for the 4 CPUs I have on my dev machine. You may want to change this to something higher than that for running locally.
