@@ -1,8 +1,8 @@
-import time, os
+import os
 import subprocess
 
 from datadog import initialize, statsd
-from ddtrace import tracer, patch
+from ddtrace import tracer
 from ddtrace.ext.priority import USER_KEEP
 
 try:
@@ -13,9 +13,6 @@ except:
 from flask import Flask, Response, jsonify, render_template, request
 
 app = Flask(__name__)
-
-#patch traceware
-#traced_app = TraceMiddleware(app, tracer, service="video-inference-app", distributed_tracing=True)
 
 from collections import deque
 inferenceQ = deque()
@@ -59,7 +56,7 @@ def video_inference():
     params = request.get_json()
     os.chdir('/workspace/pytorch-yolo-v3/')
     span = tracer.current_span()
-    app.logger.info('Span ID and trace Id: %s %s' % (span.context.span_id, span.context.trace_id))
+    app.logger.info(f"Adding {params['filename']} to video inference queue")
 
     subprocess.Popen(['python3',
                      '/workspace/pytorch-yolo-v3/video-to-json.py',
@@ -78,6 +75,7 @@ def video_inference():
 
 @app.route('/')
 def hello_world():
+    app.logger.info(f"Homepage of video inference API called")
     return 'Hello world!'
 
 if __name__ == '__main__':
