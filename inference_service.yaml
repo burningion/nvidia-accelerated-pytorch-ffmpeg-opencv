@@ -40,6 +40,8 @@ spec:
           value: 'all'
         - name: DATADOG_SERVICE_NAME
           value: 'inference-service'
+        - name: DD_TRACE_ANALYTICS_ENABLED
+          value: 'true'
       volumes:
         - hostPath:
             path: /media/stankley/Samsung_T5/downloaded-videos
