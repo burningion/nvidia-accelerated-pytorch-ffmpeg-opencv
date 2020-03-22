@@ -41,6 +41,7 @@ COPY video-to-json.py /workspace/pytorch-yolo-v3
 COPY splitter.py .
 COPY joiner.py .
 COPY video-edges.py .
+COPY test-video.mov .
 EXPOSE 5007
 ENV NVIDIA_VISIBLE_DEVICES all
 CMD ["ddtrace-run", "python3", "app.py"]
