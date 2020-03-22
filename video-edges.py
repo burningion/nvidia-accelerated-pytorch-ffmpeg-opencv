@@ -11,7 +11,7 @@ def make_edges(image, frameno, videofile):
 print("Opening up the globber")
 print(glob.glob("/pfs/videos/*.mov"))
 for filename in glob.glob("/pfs/videos/*.mov"):
-    print("Opening f{filename}")
+    print(f"Opening {filename}")
     cap = cv2.VideoCapture(filename)
     assert cap.isOpened(), 'Cannot capture source'
     tail = os.path.split(filename)[1]
